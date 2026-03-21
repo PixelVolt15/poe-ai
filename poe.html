@@ -1,87 +1,114 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>PoE IA 😎</title>
-</head>
-<body>
-
-<h1>PoE 🤖</h1>
-<!DOCTYPE html>
-<html>
-<head>
-<title>PoE IA 😎</title>
+<meta charset="UTF-8">
+<title>PoE AI</title>
 
 <style>
 body {
     background: #0f172a;
     color: white;
     font-family: Arial;
+    text-align: center;
 }
 
 #chat {
-    max-width: 600px;
+    width: 60%;
+    height: 400px;
     margin: auto;
-}
-
-.msg {
+    background: #1e293b;
     padding: 10px;
-    margin: 10px;
+    overflow-y: auto;
     border-radius: 10px;
 }
 
-.user { background: #2563eb; }
-.bot { background: #1e293b; }
+.mensaje {
+    background: #22c55e;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 10px;
+    text-align: right;
+}
+
+.respuesta {
+    background: #3b82f6;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 10px;
+    text-align: left;
+}
 
 input {
-    width: 70%;
+    width: 60%;
     padding: 10px;
+    margin-top: 10px;
 }
 
 button {
     padding: 10px;
+    margin: 5px;
 }
 </style>
-
 </head>
+
 <body>
 
-<h1 style="text-align:center;">PoE 🤖</h1>
+<h1>🤖 PoE AI</h1>
 
 <div id="chat"></div>
 
-<div style="text-align:center;">
-<input id="msg">
+<input id="input" placeholder="Escribe algo...">
+<br>
+
 <button onclick="enviar()">Enviar</button>
-</div>
+<button onclick="reiniciar()">Reiniciar</button>
 
 <script>
-let historial = [];
+function agregarMensaje(texto, tipo) {
+    let chat = document.getElementById("chat");
 
-async function enviar() {
-    let msg = document.getElementById("msg").value;
+    let div = document.createElement("div");
+    div.className = tipo;
+    div.textContent = texto;
 
-    historial.push("Tú: " + msg);
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
 
-    let res = await fetch("http://localhost:11434/api/generate", {
+function enviar() {
+    let input = document.getElementById("input");
+    let mensaje = input.value;
+
+    if (mensaje === "") return;
+
+    agregarMensaje("Tú: " + mensaje, "mensaje");
+
+    fetch("http://127.0.0.1:5000/chat", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        mode: "cors",
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify({
-            model: "llama3",
-            prompt: historial.join("\n") + "\nPoE:",
-            stream: false
+            mensaje: mensaje
         })
+    })
+    .then(response => response.json())
+    .then(data => {
+        agregarMensaje("IA: " + data.respuesta, "respuesta");
+    })
+    .catch(error => {
+        console.error(error);
+        agregarMensaje("Error conectando 😢", "respuesta");
     });
 
-    let data = await res.json();
+    input.value = "";
+}
 
-    historial.push("PoE: " + data.response);
-
-    document.getElementById("chat").innerHTML +=
-        `<div class="msg user">Tú: ${msg}</div>
-         <div class="msg bot">PoE: ${data.response}</div>`;
+function reiniciar() {
+    document.getElementById("chat").innerHTML = "";
 }
 </script>
 
 </body>
 </html>
-
