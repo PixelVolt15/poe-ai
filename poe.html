@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PoE IA 😎</title>
+</head>
+<body>
+
+<h1>PoE 🤖</h1>
+<!DOCTYPE html>
+<html>
+<head>
+<title>PoE IA 😎</title>
+
+<style>
+body {
+    background: #0f172a;
+    color: white;
+    font-family: Arial;
+}
+
+#chat {
+    max-width: 600px;
+    margin: auto;
+}
+
+.msg {
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+}
+
+.user { background: #2563eb; }
+.bot { background: #1e293b; }
+
+input {
+    width: 70%;
+    padding: 10px;
+}
+
+button {
+    padding: 10px;
+}
+</style>
+
+</head>
+<body>
+
+<h1 style="text-align:center;">PoE 🤖</h1>
+
+<div id="chat"></div>
+
+<div style="text-align:center;">
+<input id="msg">
+<button onclick="enviar()">Enviar</button>
+</div>
+
+<script>
+let historial = [];
+
+async function enviar() {
+    let msg = document.getElementById("msg").value;
+
+    historial.push("Tú: " + msg);
+
+    let res = await fetch("http://localhost:11434/api/generate", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            model: "llama3",
+            prompt: historial.join("\n") + "\nPoE:",
+            stream: false
+        })
+    });
+
+    let data = await res.json();
+
+    historial.push("PoE: " + data.response);
+
+    document.getElementById("chat").innerHTML +=
+        `<div class="msg user">Tú: ${msg}</div>
+         <div class="msg bot">PoE: ${data.response}</div>`;
+}
+</script>
+
+</body>
+</html>
+
